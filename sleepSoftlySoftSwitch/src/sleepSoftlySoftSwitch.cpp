@@ -273,6 +273,12 @@ void loop(){
       color++;
       Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
       setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+      display.clearDisplay();
+      display.setTextSize(1);
+      display.setTextColor(WHITE);
+      display.setCursor(0,0);
+      display.printf("Follow iotfreq on Instagram for the latest updates on IoT boot camp\n");
+      display.display(); //sends to OLCD
     }
     if (keyNum == '4') {  // lower right pressed
       if (hueBrightness <= 255) {
