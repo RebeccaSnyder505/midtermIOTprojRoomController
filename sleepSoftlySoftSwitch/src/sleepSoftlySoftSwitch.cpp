@@ -43,11 +43,14 @@ const int MYWEMO_B = 2; // TESTING change to a different wemo later, to be contr
 bool wemoAState;
 bool wemoBState;
 
+const int MOTORPIN = D13; // for servo (lock function)
+Servo myServo;
+bool servoState;
+
 // create Keypad object 
 Keypad softKeypad = Keypad( makeKeymap(softKeys), rowPins, colPins, ROWS, COLS );
 
 
-void moveLock(); // TESTING still to write for lock toggle
 
 
 
@@ -85,6 +88,10 @@ void setup() {
   wemoBState = false;
   wemoWrite(MYWEMO_A, wemoAState);
   wemoWrite(MYWEMO_B,wemoBState);
+  myServo.attach(MOTORPIN);
+  servoState = 0;
+  myServo.write(180); //locks when rebooting or reflashing
+  Serial.printf("initialized to locked");
 }
 
 // loop() runs over and over again, as quickly as it can execute.
@@ -128,17 +135,22 @@ void loop(){
       wemoWrite(MYWEMO_B,wemoBState);
       Serial.printf("wemo #%d set to %d\n", MYWEMO_B, wemoBState);
     }
-    if (keyNum == '8')  {
-    //  yeah gotta calll the lock function here im gonna write this after lunch
+    if (keyNum == '8')  { // upper center, lock or unlock with servo
+      if (servoState){
+        myServo.write(180); //lock
+        servoState = !servoState;
+        Serial.printf("locked \n");
+        delay(100);
+      }
+      else{
+       myServo.write(0); //unlock
+       servoState = !servoState;
+       Serial.printf("unlocked \n");
+       delay(100);
+      }
     }
   }
 }
 
-//defining functions
 
-
-
-void moveLock(){  // needs written
-
-}
  
