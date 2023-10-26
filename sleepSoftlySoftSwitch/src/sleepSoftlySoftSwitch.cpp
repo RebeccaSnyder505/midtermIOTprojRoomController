@@ -5,6 +5,13 @@
  * Date: 2023-10-26
  * 
  * 
+ * ////still to complete: make hue lights do something in response to environmental inputs (temp etc)
+ * ////still to do -- incorporate neopixel ring
+ * /// still to do -- 3d print, laser cut, maybe something with wood shop or wazer
+ * /// still to do -- move parts to smaller breadboard
+ *
+ * 
+ * 
  * For comprehensive documentation and examples, please visit:
  * https://docs.particle.io/firmware/best-practices/firmware-template/
  * 
