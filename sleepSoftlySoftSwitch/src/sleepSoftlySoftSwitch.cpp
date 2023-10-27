@@ -6,9 +6,6 @@
  * 
  * 
  * ////still to complete: make hue lights do something in response to environmental inputs (temp etc)
- * ////still to do -- incorporate neopixel ring
- * /// still to do -- 3d print, laser cut, maybe something with wood shop or wazer
- * /// still to do -- move parts to smaller breadboard
  *
  * 
  * 
@@ -19,6 +16,7 @@
  * Must install libary "IoTClassroom_CNM" with ctrl-shift-p
  * must install library "Keypad_Particle" with ctrl-shift-p
  * must install library "Adafruit_SSD1306" with ctrl-shift-p
+ * must install library "neopixel" with ctrl-shift-p
  */
 
 // Include Particle Device OS APIs
@@ -30,8 +28,13 @@
 #include "Adafruit_GFX.h"
 #include "Adafruit_SSD1306.h"
 #define OLED_RESET D4
+#include <neoPixel.h>
+#ifndef _PIXELCOLOR_ 
+  #define _PIXELCOLOR_
+    #include "Colors.h" //for neopixels
+#endif // _PIXELCOLOR_
 
-//declare global constants and variables related to soft keypad
+// declare global constants and variables related to soft keypad
 const byte ROWS = 3;  
 const byte COLS = 3;
 char keyNum;
@@ -40,28 +43,41 @@ char softKeys [ROWS][COLS] = {
   {'4', '5', '6'},
   {'7', '8', '9'}
 };
-byte rowPins[ROWS] = { D16, D15, D17 };
-byte colPins[COLS] = { D18, D19, D14 };
+byte rowPins[ROWS] = { D16, D15, D17 }; // wires from lower layer of soft keypad, D16 green, D15 yellow, D17 blue
+byte colPins[COLS] = { D18, D19, D14 }; // wires from upper layer of soft keypad, D18 green, D19 yellow, D14 blue
 
-//declare global constants and variables related to hue lights
+// declare global constants and variables related to Hue lights
 const int BULB=3; 
 int color;
 int hueBrightness;
 bool hueTurnOn;
 
+// declarations related to Wemo
 const int MYWEMO_A = 2; // to be controled by upper left
 const int MYWEMO_B = 2; // TESTING change to a different wemo later, to be controlled by upper right
 bool wemoAState;
 bool wemoBState;
 
-const int MOTORPIN = D13; // for servo (lock function)
+// declarations related to servo motor
+const int MOTORPIN = D13;
 Servo myServo;
 bool servoState;
 
-// create Keypad object 
-Keypad softKeypad = Keypad( makeKeymap(softKeys), rowPins, colPins, ROWS, COLS );
+// declarations related to NeoPixels
+const int PIXELCOUNT = 12; // total number of NeoPixels
+const int BRI = 16; // brightness level
+int i;
+int arrayRead;
+int hexColor;
 
-Adafruit_SSD1306 display(OLED_RESET); //declare object "display"
+// create Keypad object 
+Keypad softKeypad = Keypad( makeKeymap(softKeys), rowPins, colPins, ROWS, COLS ); //
+
+//declare object "display" to use with OLED
+Adafruit_SSD1306 display(OLED_RESET); 
+
+// declare object "pixel" to use with NeoPixels
+Adafruit_NeoPixel pixel (PIXELCOUNT, SPI1, WS2812B);
 
 
 
@@ -80,8 +96,8 @@ SerialLogHandler logHandler(LOG_LEVEL_INFO);
 
 
 
-//begin trying out adafruit bitmap thing
 
+// Bitmaps, putting these last in the header
 
 //#define LOGO16_GLCD_HEIGHT 64 
 //#define LOGO16_GLCD_WIDTH  128
@@ -223,7 +239,7 @@ static const unsigned char IoT_bmp[] =  // "Internet of things" bitmap
 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff};
-//end trying out adafruit bitmap thing
+
 
 
 
@@ -257,26 +273,36 @@ void setup() {
   Serial.printf("initialized to locked\n");
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initalize adafruit OLCD
 
-
-  //begin trying weird stuff for OLCD in setup
-
-  // miniature bitmap display
+  // OLED bitmap display
   display.clearDisplay();
   display.drawBitmap(0, 0, DDC_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
   display.display();
   Serial.printf("setup drawing on OLCD");
-  // end trying weird stuff for OLCD in setup
+
+  pixel.begin();
+  //pixel.show(); // initialize all NeoPixel to off
+  pixel.setBrightness(4); // initialize with much dimmer NeoPixels
+  for (i=0; i<PIXELCOUNT; i++) { // rainbow colors
+    if (i<=6){
+      hexColor = rainbow[i];
+    }
+    else {
+      hexColor = rainbow[(i % 6)]; 
+    }
+    pixel.setPixelColor(i, hexColor);
+    pixel.show();
+  }
 }
 
 
 
 
-// loop() runs over and over again, as quickly as it can execute.
+
 void loop(){
   char keyNum = softKeypad.getKey(); 
   if (keyNum){
     Serial.println(keyNum); //print the key number for debugging
-    if (keyNum == '2') { // increment color if lower center pressed
+    if (keyNum == '2') { // increment Hue light color if lower center pressed
       color++;
       Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
       setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
@@ -286,6 +312,18 @@ void loop(){
       display.setCursor(0,0);
       display.printf("Follow iotfreq on Instagram for the latest updates on IoT boot camp\n");
       display.display(); //sends to OLCD
+
+      pixel.setBrightness(BRI); // begin neopixel block
+      for (i=0; i<PIXELCOUNT; i++) { // neopixels set to same color as Hue lights
+        if (i<=6){
+          hexColor = rainbow[color%7]; 
+        }
+        else {
+          hexColor = rainbow[(color%7)]; 
+        }
+        pixel.setPixelColor(i, hexColor);
+        pixel.show();
+      }
     }
     if (keyNum == '4') {  // lower right pressed
       if (hueBrightness <= 255) {
