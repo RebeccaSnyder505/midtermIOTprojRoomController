@@ -47,14 +47,15 @@ byte rowPins[ROWS] = { D16, D15, D17 }; // wires from lower layer of soft keypad
 byte colPins[COLS] = { D18, D19, D14 }; // wires from upper layer of soft keypad, D18 green, D19 yellow, D14 blue
 
 // declare global constants and variables related to Hue lights
-const int BULB=3; 
+const int BULB=3; // useful when there are more students working at once
+const int TOTALBULB=6; // there are "6" hue bulbs, numbered 0 to 5
 int color;
 int hueBrightness;
 bool hueTurnOn;
 
 // declarations related to Wemo
-const int MYWEMO_A = 2; // to be controled by upper left
-const int MYWEMO_B = 2; // TESTING change to a different wemo later, to be controlled by upper right
+const int MYWEMO_A = 0; // to be controled by upper left
+const int MYWEMO_B = 1; // TESTING change to a different wemo later, to be controlled by upper right
 bool wemoAState;
 bool wemoBState;
 
@@ -248,6 +249,7 @@ void setup() {
   Serial.begin(9600);
   waitFor(Serial.isConnected,15000);
 
+// WiFi Setup
   WiFi.on();
   WiFi.clearCredentials();
   WiFi.setCredentials("IoTNetwork"); //connecting to classroom router
@@ -258,30 +260,34 @@ void setup() {
   }
   Serial.printf("\n\n");
 
+// Hue lights and Wemo setup
   hueBrightness = 1; //start light at lower level
   color = 0; //start with red
   hueTurnOn = true; //start with hue light on
   delay(5000); // waiting for network to wake
-  setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255); // initialize the hue light
+  setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255); 
   wemoAState = false;
   wemoBState = false;
   wemoWrite(MYWEMO_A, wemoAState);
   wemoWrite(MYWEMO_B,wemoBState);
+
+// Servo setup
   myServo.attach(MOTORPIN);
   servoState = 0;
   myServo.write(180); //locks when rebooting or reflashing
   Serial.printf("initialized to locked\n");
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initalize adafruit OLCD
 
-  // OLED bitmap display
+// OLED bitmap display setup
   display.clearDisplay();
   display.drawBitmap(0, 0, DDC_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
   display.display();
   Serial.printf("setup drawing on OLCD");
 
-  pixel.begin();
-  //pixel.show(); // initialize all NeoPixel to off
-  pixel.setBrightness(4); // initialize with much dimmer NeoPixels
+// neoPixels setup
+  Serial.printf("begin neoPixel initialization");
+  pixel.begin(); 
+  pixel.setBrightness(BRI);
   for (i=0; i<PIXELCOUNT; i++) { // rainbow colors
     if (i<=6){
       hexColor = rainbow[i];
@@ -299,13 +305,16 @@ void setup() {
 
 
 void loop(){
-  char keyNum = softKeypad.getKey(); 
+  char keyNum = softKeypad.getKey();
   if (keyNum){
-    Serial.println(keyNum); //print the key number for debugging
+    Serial.println(keyNum); 
     if (keyNum == '2') { // increment Hue light color if lower center pressed
       color++;
       Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
-      setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+      //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255); //hue light #BULB
+      for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
+        setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+      }
       display.clearDisplay();
       display.setTextSize(1);
       display.setTextColor(WHITE);
@@ -330,19 +339,28 @@ void loop(){
         hueBrightness = hueBrightness + 50; // increase brightness by an amount
         hueTurnOn = true; // ensure light is on
         Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
-        setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+        //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+        for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
+          setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+        }
       }
     }
     if (keyNum == '3') {  //lower left pressed
       if (hueBrightness > 0) {
         hueBrightness = hueBrightness - 50; //decrease by an amount
         Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
-        setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+        //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+        for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
+          setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+        }
       }
       else {
         hueTurnOn = false; // turn it off if the brightness is zero or less
         Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
-        setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+        //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+        for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
+          setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+        }
       }
 
     }
@@ -380,6 +398,5 @@ void loop(){
     }
   }
 }
-
 
  
