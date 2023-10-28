@@ -265,7 +265,7 @@ void setup() {
   color = 0; //start with red
   hueTurnOn = true; //start with hue light on
   delay(5000); // waiting for network to wake
-  setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255); 
+  setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255); // just one bulb for init 
   wemoAState = false;
   wemoBState = false;
   wemoWrite(MYWEMO_A, wemoAState);
@@ -282,20 +282,28 @@ void setup() {
   display.clearDisplay();
   display.drawBitmap(0, 0, DDC_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
   display.display();
-  Serial.printf("setup drawing on OLCD");
+  Serial.printf("setup drawing on OLCD\n");
 
 // neoPixels setup
-  Serial.printf("begin neoPixel initialization");
+  Serial.printf("begin neoPixel initialization\n");
   pixel.begin(); 
   pixel.setBrightness(BRI);
-  for (i=0; i<PIXELCOUNT; i++) { // rainbow colors
-    if (i<=6){
-      hexColor = rainbow[i];
-    }
-    else {
-      hexColor = rainbow[(i % 6)]; 
-    }
+  //for (i=0; i<PIXELCOUNT; i++) { // rainbow colors
+ //   if (i<=6){
+ //     hexColor = rainbow[i];
+  //  }
+  //  else {
+  //    hexColor = rainbow[(i % 6)]; 
+  //  }
+  //  pixel.setPixelColor(i, hexColor);
+  //  pixel.show();
+  //}
+  for (i=PIXELCOUNT; i>=0; i--){ //send a pixel down
+    hexColor = random(0xFFFFFF);
     pixel.setPixelColor(i, hexColor);
+    pixel.show();
+    delay(60);
+    pixel.setPixelColor(i, black);
     pixel.show();
   }
 }
@@ -324,42 +332,41 @@ void loop(){
 
       pixel.setBrightness(BRI); // begin neopixel block
       for (i=0; i<PIXELCOUNT; i++) { // neopixels set to same color as Hue lights
-        if (i<=6){
           hexColor = rainbow[color%7]; 
-        }
-        else {
-          hexColor = rainbow[(color%7)]; 
-        }
-        pixel.setPixelColor(i, hexColor);
-        pixel.show();
       }
+      pixel.setPixelColor(i, hexColor);
+      pixel.show();
+        Serial.printf("neopixel color %i \n", hexColor);
     }
     if (keyNum == '4') {  // lower right pressed
       if (hueBrightness <= 255) {
         hueBrightness = hueBrightness + 50; // increase brightness by an amount
         hueTurnOn = true; // ensure light is on
-        Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
+        //Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
         //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
         for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
           setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+          Serial.printf("Setting bulb %i to color %06i\n",i,HueRainbow[color%7]);
         }
       }
     }
     if (keyNum == '3') {  //lower left pressed
       if (hueBrightness > 0) {
         hueBrightness = hueBrightness - 50; //decrease by an amount
-        Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
+        //Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
         //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
         for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
           setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+          Serial.printf("Setting bulb %i to color %06i\n",i,HueRainbow[color%7]);
         }
       }
       else {
         hueTurnOn = false; // turn it off if the brightness is zero or less
-        Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
+        //Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
         //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
         for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
           setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
+          Serial.printf("Setting bulb %i to color %06i\n",i,HueRainbow[color%7]);
         }
       }
 
