@@ -48,14 +48,14 @@ byte colPins[COLS] = { D18, D19, D14 }; // wires from upper layer of soft keypad
 
 // declare global constants and variables related to Hue lights
 const int BULB=3; // useful when there are more students working at once
-const int TOTALBULB=2; // trying a lower number of bulbs, maybe too many messed things up
+const int TOTALBULB=6; // trying a lower number of bulbs, maybe too many messed things up
 int color;
 int hueBrightness;
 bool hueTurnOn;
 
 // declarations related to Wemo
 const int MYWEMO_A = 0; // to be controled by upper left
-const int MYWEMO_B = 3; // TESTING change to a different wemo later, to be controlled by upper right
+const int MYWEMO_B = 3; // to be controlled by upper right
 bool wemoAState;
 bool wemoBState;
 
@@ -78,7 +78,7 @@ Keypad softKeypad = Keypad( makeKeymap(softKeys), rowPins, colPins, ROWS, COLS )
 Adafruit_SSD1306 display(OLED_RESET); 
 
 // declare object "pixel" to use with NeoPixels
-Adafruit_NeoPixel pixel (PIXELCOUNT, SPI1, WS2812B);
+Adafruit_NeoPixel pixel (PIXELCOUNT, SPI1, WS2812B);;
 
 
 
