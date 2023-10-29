@@ -277,9 +277,9 @@ void setup() {
   servoState = 0;
   myServo.write(180); //locks when rebooting or reflashing
   Serial.printf("initialized to locked\n");
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initalize adafruit OLCD
 
 // OLED bitmap display setup
+  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initalize adafruit OLCD
   //display.clearDisplay();
   //display.drawBitmap(0, 0, DDC_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
   //display.display();
@@ -319,25 +319,25 @@ void loop(){
     Serial.println(keyNum); 
     if (keyNum == '2') { // increment Hue light color if lower center pressed
       color++;
-      Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
       //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255); //hue light #BULB
       for (i=1; i<=TOTALBULB; i++) { // cycle through all the class hue lights
+        Serial.printf("Setting bulb %i to color %06i\n",i ,HueRainbow[color%7]);
         setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
       }
-      display.clearDisplay();
-      display.setTextSize(1);
-      display.setTextColor(WHITE);
-      display.setCursor(0,0);
-      display.printf("Follow iotfreq on Instagram for the latest updates on IoT boot camp\n");
-      display.display(); //sends to OLCD
+      //display.clearDisplay();
+      //display.setTextSize(1);
+      //display.setTextColor(WHITE);
+      //display.setCursor(0,0);
+      //display.printf("Follow iotfreq on Instagram for the latest updates on IoT boot camp\n");
+      //display.display(); //sends to OLCD
 
       pixel.setBrightness(BRI); // begin neopixel block
       for (i=1; i<PIXELCOUNT; i++) { // neopixels set to same color as Hue lights
-          hexColor = rainbow[color%7]; 
+          hexColor = rainbow[3]; 
+          pixel.setPixelColor(i, hexColor);
+          Serial.printf("neopixel color %i", hexColor);
       }
-      pixel.setPixelColor(i, hexColor);
       pixel.show();
-        Serial.printf("neopixel color %i \n", hexColor);
     }
     if (keyNum == '4') {  // lower right pressed
       if (hueBrightness <= 255) {
