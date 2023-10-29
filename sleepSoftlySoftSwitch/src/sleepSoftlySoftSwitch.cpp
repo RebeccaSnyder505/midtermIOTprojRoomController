@@ -78,7 +78,7 @@ Keypad softKeypad = Keypad( makeKeymap(softKeys), rowPins, colPins, ROWS, COLS )
 Adafruit_SSD1306 display(OLED_RESET); 
 
 // declare object "pixel" to use with NeoPixels
-Adafruit_NeoPixel pixel (PIXELCOUNT, SPI1, WS2812B);;
+Adafruit_NeoPixel pixel (PIXELCOUNT, SPI1, WS2812B);
 
 
 
@@ -350,16 +350,6 @@ void loop(){
           Serial.printf("Setting bulb %i to color %06i\n",i,HueRainbow[color%7]);
         }
       }
-      else {
-        hueTurnOn = false; // turn it off if the brightness is zero or less
-        //Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
-        //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
-        for (i=1; i<=TOTALBULB; i++) { // cycle through all the class hue lights
-          setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
-          Serial.printf("Setting bulb %i to color %06i\n",i,HueRainbow[color%7]);
-        }
-      }
-
     }
     if (keyNum == '6') {   // upper left pressed, wemo A
       wemoAState = !wemoAState;
@@ -397,6 +387,10 @@ void loop(){
 }
 
  
+
+
+
+
 
 
 
