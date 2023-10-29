@@ -92,7 +92,8 @@ SYSTEM_THREAD(ENABLED);
 
 // Show system, cloud connectivity, and application logs over USB
 // View logs with CLI using 'particle serial monitor --follow'
-SerialLogHandler logHandler(LOG_LEVEL_INFO);
+// --> something is weird with serial moniter so I will comment this out
+//SerialLogHandler logHandler(LOG_LEVEL_INFO); 
 
 
 
@@ -279,10 +280,10 @@ void setup() {
   display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initalize adafruit OLCD
 
 // OLED bitmap display setup
-  display.clearDisplay();
-  display.drawBitmap(0, 0, DDC_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
-  display.display();
-  Serial.printf("setup drawing on OLCD\n");
+  //display.clearDisplay();
+  //display.drawBitmap(0, 0, DDC_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
+  //display.display();
+  //Serial.printf("setup drawing on OLCD\n");
 
 // neoPixels setup
   Serial.printf("begin neoPixel initialization\n");
@@ -375,18 +376,18 @@ void loop(){
       wemoAState = !wemoAState;
       wemoWrite(MYWEMO_A, wemoAState);
       Serial.printf("wemo #%d set to %d\n", MYWEMO_A, wemoAState);
-      display.clearDisplay();
-      display.drawBitmap(0, 0, IoT_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
-      display.display();
+      //display.clearDisplay();
+      //display.drawBitmap(0, 0, IoT_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
+      //display.display();
       Serial.printf("wemo A, IOT drawing on OLCD");
     }
     if (keyNum == '7') {  //upper right pressed, wemo B
       wemoBState = !wemoBState;
       wemoWrite(MYWEMO_B,wemoBState);
       Serial.printf("wemo #%d set to %d\n", MYWEMO_B, wemoBState);
-      display.clearDisplay();
-      display.drawBitmap(0, 0, IoT_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
-      display.display();
+      //display.clearDisplay();
+      //display.drawBitmap(0, 0, IoT_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
+      //display.display();
       Serial.printf("wemo B, IOT drawing on OLCD");
     }
     if (keyNum == '8')  { // upper center, lock or unlock with servo
