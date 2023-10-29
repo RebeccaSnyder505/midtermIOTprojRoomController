@@ -66,7 +66,7 @@ bool servoState;
 
 // declarations related to NeoPixels
 const int PIXELCOUNT = 12; // total number of NeoPixels
-const int BRI = 16; // brightness level
+const int BRI = 32; // brightness level
 int i;
 int arrayRead;
 int hexColor;
@@ -80,10 +80,8 @@ Adafruit_SSD1306 display(OLED_RESET);
 // declare object "pixel" to use with NeoPixels
 Adafruit_NeoPixel pixel (PIXELCOUNT, SPI1, WS2812B);
 
-
-
-
-
+// idk why bitmaps arent' working but maybe can do something with OLED???
+void testdrawcircle(void);
 
 SYSTEM_MODE(MANUAL); //so we can log in to classroom router
 
@@ -92,8 +90,7 @@ SYSTEM_THREAD(ENABLED);
 
 // Show system, cloud connectivity, and application logs over USB
 // View logs with CLI using 'particle serial monitor --follow'
-// --> something is weird with serial moniter so I will comment this out
-//SerialLogHandler logHandler(LOG_LEVEL_INFO); 
+SerialLogHandler logHandler(LOG_LEVEL_INFO); 
 
 
 
@@ -101,10 +98,9 @@ SYSTEM_THREAD(ENABLED);
 
 // Bitmaps, putting these last in the header
 
-//#define LOGO16_GLCD_HEIGHT 64 
-//#define LOGO16_GLCD_WIDTH  128
+//commenting out because it seems like the display doesn't work anymore???
+//and I think trying to use it is just making everything slower
 
-// --> kinda concerned maybe these bitmaps are taking up too much memory?
 // static const unsigned char DDC_bmp[] = // "deep dive coding" bitmap
 // { // 'dd', 128x64px
 // 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
@@ -265,7 +261,7 @@ void setup() {
 
 // Hue lights and Wemo setup
   hueBrightness = 1; //start light at lower level
-  color = 0; //start with red
+  color = 0; //start with red 
   hueTurnOn = true; //start with hue light on
   delay(5000); // waiting for network to wake
   setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255); // just one bulb for init 
@@ -280,19 +276,28 @@ void setup() {
   myServo.write(180); //locks when rebooting or reflashing
   Serial.printf("initialized to locked\n");
 
-// OLED bitmap display setup
-  display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initalize adafruit OLCD
-  //display.clearDisplay();
-  //display.drawBitmap(0, 0, DDC_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
-  //display.display();
-  //Serial.printf("setup drawing on OLCD\n");
+// OLED bitmap display setup -- commenting out because it hangs after this
+  // display.begin(SSD1306_SWITCHCAPVCC, 0x3C); // initalize adafruit OLCD
+  // display.clearDisplay();
+  // display.drawBitmap(0, 0, DDC_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
+  // display.display();
+  // Serial.printf("setup drawing on OLCD\n");
+
+// draw mulitple circles, idk maybe this will work? copied from example code
+// the OLED doesn't seem to be working but I will leave this code in 
+// so I will know if it starts working again
+// but I'm going to comment out all other display stuff because it's 
+// just making things slower at this point
+  testdrawcircle(); 
+  display.display();
+  Serial.printf("testdrawcircle\n");
 
 // neoPixels setup
   Serial.printf("begin neoPixel initialization\n");
   pixel.begin(); 
   pixel.setBrightness(BRI);
-  for (i=0; i<PIXELCOUNT; i++) { // rainbow colors
-    hexColor = teal;
+  for (i=0; i<=PIXELCOUNT; i++) { 
+    hexColor = tomato;
     pixel.setPixelColor(i, hexColor);
     pixel.show();
   }
@@ -313,16 +318,16 @@ void loop(){
         Serial.printf("Setting bulb %i to color %06i\n",i ,HueRainbow[color%7]);
         setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
       }
-      //display.clearDisplay();
-      //display.setTextSize(1);
-      //display.setTextColor(WHITE);
-      //display.setCursor(0,0);
-      //display.printf("Follow iotfreq on Instagram for the latest updates on IoT boot camp\n");
-      //display.display(); //sends to OLCD
+      // display.clearDisplay();
+      // display.setTextSize(1);
+      // display.setTextColor(WHITE);
+      // display.setCursor(0,0);
+      // display.printf("Follow iotfreq on Instagram for the latest updates on IoT boot camp\n");
+      // display.display(); //sends to OLCD
 
       pixel.setBrightness(BRI); // begin neopixel block
-      for (i=1; i<PIXELCOUNT; i++) { // neopixels set to same color as Hue lights
-          hexColor = cyan; 
+      for (i=1; i<=PIXELCOUNT; i++) { 
+          hexColor = rainbow[color%7]; 
           pixel.setPixelColor(i, hexColor);
           Serial.printf("neopixel color %i", hexColor);
       }
@@ -338,6 +343,11 @@ void loop(){
           setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
           Serial.printf("Setting bulb %i to color %06i\n",i,HueRainbow[color%7]);
         }
+        for (i=0; i<=PIXELCOUNT; i++) { 
+          hexColor = yellow;
+          pixel.setPixelColor(i, hexColor);
+          pixel.show();
+        }
       }
     }
     if (keyNum == '3') {  //lower left pressed
@@ -349,44 +359,84 @@ void loop(){
           setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
           Serial.printf("Setting bulb %i to color %06i\n",i,HueRainbow[color%7]);
         }
+        for (i=0; i<PIXELCOUNT; i++) { 
+          hexColor = maroon;
+          pixel.setPixelColor(i, hexColor);
+          pixel.show();
+        }
       }
     }
     if (keyNum == '6') {   // upper left pressed, wemo A
       wemoAState = !wemoAState;
       wemoWrite(MYWEMO_A, wemoAState);
       Serial.printf("wemo #%d set to %d\n", MYWEMO_A, wemoAState);
-      //display.clearDisplay();
-      //display.drawBitmap(0, 0, IoT_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
-      //display.display();
+      // display.clearDisplay();
+      // display.drawBitmap(0, 0, IoT_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
+      // display.display();
       Serial.printf("wemo A, IOT drawing on OLCD");
+      for (i=0; i<=PIXELCOUNT; i++) { 
+        hexColor = olive;
+        pixel.setPixelColor(i, hexColor);
+        pixel.show();
+      }
     }
     if (keyNum == '7') {  //upper right pressed, wemo B
       wemoBState = !wemoBState;
       wemoWrite(MYWEMO_B,wemoBState);
       Serial.printf("wemo #%d set to %d\n", MYWEMO_B, wemoBState);
-      //display.clearDisplay();
-      //display.drawBitmap(0, 0, IoT_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
-      //display.display();
+      // display.clearDisplay();
+      // display.drawBitmap(0, 0, IoT_bmp, 128, 64, 1); //deep dive coding bitmap on OLCD
+      // display.display();
       Serial.printf("wemo B, IOT drawing on OLCD");
+      for (i=0; i<PIXELCOUNT; i++) { 
+        hexColor = purple;
+        pixel.setPixelColor(i, hexColor);
+        pixel.show();
+      }      
     }
     if (keyNum == '8')  { // upper center, lock or unlock with servo
       if (servoState){
         myServo.write(180); //lock
         servoState = !servoState;
         Serial.printf("locked \n");
-        delay(100);
+        for (i=0; i<=PIXELCOUNT; i++) { 
+          hexColor = red;
+          pixel.setPixelColor(i, hexColor);
+          pixel.show();
+          delay(50);
+        }        
       }
       else{
        myServo.write(0); //unlock
        servoState = !servoState;
        Serial.printf("unlocked \n");
-       delay(100);
+        for (i=0; i<=PIXELCOUNT; i++) { 
+          hexColor = green;
+          pixel.setPixelColor(i, hexColor);
+          pixel.show();
+          delay(50);
+        } 
       }
     }
   }
 }
 
  
+void testdrawcircle(void) {
+  for (int16_t i=0; i<display.height(); i+=2) {
+    display.drawCircle(display.width()/2, display.height()/2, i, WHITE);
+    display.display();
+  }
+}
+
+// this comment only exists so the cursor can go somewhere in here and 
+// any errant keystrokes won't cause trouble
+// i.e. there's some stuff to delete if backspace gets hit or something
+// it's a very boring comment and can be ignored
+
+
+
+
 
 
 
