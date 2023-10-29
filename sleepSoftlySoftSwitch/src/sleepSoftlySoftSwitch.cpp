@@ -48,14 +48,14 @@ byte colPins[COLS] = { D18, D19, D14 }; // wires from upper layer of soft keypad
 
 // declare global constants and variables related to Hue lights
 const int BULB=3; // useful when there are more students working at once
-const int TOTALBULB=6; // there are "6" hue bulbs, numbered 0 to 5
+const int TOTALBULB=2; // trying a lower number of bulbs, maybe too many messed things up
 int color;
 int hueBrightness;
 bool hueTurnOn;
 
 // declarations related to Wemo
 const int MYWEMO_A = 0; // to be controled by upper left
-const int MYWEMO_B = 1; // TESTING change to a different wemo later, to be controlled by upper right
+const int MYWEMO_B = 3; // TESTING change to a different wemo later, to be controlled by upper right
 bool wemoAState;
 bool wemoBState;
 
@@ -320,7 +320,7 @@ void loop(){
       color++;
       Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
       //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255); //hue light #BULB
-      for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
+      for (i=1; i<=TOTALBULB; i++) { // cycle through all the class hue lights
         setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
       }
       display.clearDisplay();
@@ -331,7 +331,7 @@ void loop(){
       display.display(); //sends to OLCD
 
       pixel.setBrightness(BRI); // begin neopixel block
-      for (i=0; i<PIXELCOUNT; i++) { // neopixels set to same color as Hue lights
+      for (i=1; i<PIXELCOUNT; i++) { // neopixels set to same color as Hue lights
           hexColor = rainbow[color%7]; 
       }
       pixel.setPixelColor(i, hexColor);
@@ -344,7 +344,7 @@ void loop(){
         hueTurnOn = true; // ensure light is on
         //Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
         //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
-        for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
+        for (i=1; i<=TOTALBULB; i++) { // cycle through all the class hue lights
           setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
           Serial.printf("Setting bulb %i to color %06i\n",i,HueRainbow[color%7]);
         }
@@ -355,7 +355,7 @@ void loop(){
         hueBrightness = hueBrightness - 50; //decrease by an amount
         //Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
         //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
-        for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
+        for (i=1; i<=TOTALBULB; i++) { // cycle through all the class hue lights
           setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
           Serial.printf("Setting bulb %i to color %06i\n",i,HueRainbow[color%7]);
         }
@@ -364,7 +364,7 @@ void loop(){
         hueTurnOn = false; // turn it off if the brightness is zero or less
         //Serial.printf("Setting bulb %i to color %06i\n",BULB,HueRainbow[color%7]);
         //setHue(BULB,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
-        for (i=0; i<=TOTALBULB; i++) { // cycle through all the class hue lights
+        for (i=1; i<=TOTALBULB; i++) { // cycle through all the class hue lights
           setHue(i,hueTurnOn,HueRainbow[color%7],hueBrightness,255);
           Serial.printf("Setting bulb %i to color %06i\n",i,HueRainbow[color%7]);
         }
@@ -407,3 +407,6 @@ void loop(){
 }
 
  
+
+
+
